@@ -36,11 +36,11 @@ RANDOM_BG_COLOR=${BG_COLORS[$RANDOM % ${#BG_COLORS[@]}]}
 function check_progress {
     while true; do
         echo
-        echo -n "${BOLD}${GREEN}Have you created hello-cloudbuild & hello-cloudbuild-deploy ($REGION) with ^candidate$ triggers ? (Y/N): ${RESET}"
+        echo -n "${BOLD}${YELLOW}Have you created hello-cloudbuild & hello-cloudbuild-deploy ($REGION) with ^candidate$ triggers ? (Y/N): ${RESET}"
         read -r user_input
         if [[ "$user_input" == "Y" || "$user_input" == "y" ]]; then
             echo
-            echo "${BOLD}${WHITE}Great! Proceeding to the next steps...${RESET}"
+            echo "${BOLD}${GREEN}Great! Proceeding to the next steps...${RESET}"
             echo
             break
         elif [[ "$user_input" == "N" || "$user_input" == "n" ]]; then
@@ -48,7 +48,7 @@ function check_progress {
             echo "${BOLD}${RED}Please create hello-cloudbuild & hello-cloudbuild-deploy ($REGION) with ^candidate$ triggers and then press Y to continue.${RESET}"
         else
             echo
-            echo "${BOLD}${BLUE}Invalid input. Please enter Y or N.${RESET}"
+            echo "${BOLD}${MAGENTA}Invalid input. Please enter Y or N.${RESET}"
         fi
     done
 }
@@ -58,7 +58,7 @@ function check_progress {
 echo "${RANDOM_BG_COLOR}${RANDOM_TEXT_COLOR}${BOLD}Starting Execution${RESET}"
 
 # Step 1: Set environment variables
-echo "${BOLD}${YELLOW}Setting up environment variables${RESET}"
+echo "${BOLD}${CYAN}Setting up environment variables${RESET}"
 export PROJECT_ID=$(gcloud config get-value project)
 export PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')
 export REGION=$(gcloud compute project-info describe \
@@ -66,14 +66,14 @@ export REGION=$(gcloud compute project-info describe \
 gcloud config set compute/region $REGION
 
 # Step 2: Enable required services
-echo "${BOLD}${CYAN}Enabling necessary Google Cloud services${RESET}"
+echo "${BOLD}${YELLOW}Enabling necessary Google Cloud services${RESET}"
 gcloud services enable container.googleapis.com \
     cloudbuild.googleapis.com \
     secretmanager.googleapis.com \
     containeranalysis.googleapis.com
 
 # Step 3: Create Artifact Registry repository
-echo "${BOLD}${GREEN}Creating Artifact Registry repository${RESET}"
+echo "${BOLD}${BLUE}Creating Artifact Registry repository${RESET}"
 gcloud artifacts repositories create my-repository \
   --repository-format=docker \
   --location=$REGION
@@ -87,7 +87,7 @@ echo "${BOLD}${CYAN}Installing GitHub CLI${RESET}"
 curl -sS https://webi.sh/gh | sh
 
 # Step 6: Authenticate GitHub
-echo "${BOLD}${BLUE} Authenticating with GitHub${RESET}"
+echo "${BOLD}${GREEN} Authenticating with GitHub${RESET}"
 gh auth login 
 gh api user -q ".login"
 GITHUB_USERNAME=$(gh api user -q ".login")
@@ -97,7 +97,7 @@ echo ${GITHUB_USERNAME}
 echo ${USER_EMAIL}
 
 # Step 7: Create GitHub Repositories
-echo "${BOLD}${GREEN}Creating GitHub repositories${RESET}"
+echo "${BOLD}${YELLOW}Creating GitHub repositories${RESET}"
 gh repo create  hello-cloudbuild-app --private 
 
 gh repo create  hello-cloudbuild-env --private
@@ -119,7 +119,7 @@ sed -i "s/us-central1/$REGION/g" cloudbuild-trigger-cd.yaml
 sed -i "s/us-central1/$REGION/g" kubernetes.yaml.tpl
 
 # Step 10: Initialize git repository
-echo "${BOLD}${YELLOW}Initializing Git repository${RESET}"
+echo "${BOLD}${GREEN}Initializing Git repository${RESET}"
 git init
 git config credential.helper gcloud.sh
 git remote add google https://github.com/${GITHUB_USERNAME}/hello-cloudbuild-app
@@ -134,7 +134,7 @@ gcloud builds submit --tag="${REGION}-docker.pkg.dev/${PROJECT_ID}/my-repository
 
 echo
 
-echo "${BOLD}${GREEN}Click here to set up triggers: ${RESET}""https://console.cloud.google.com/cloud-build/triggers;region=global/add?project=$PROJECT_ID"
+echo "${BOLD}${BLUE}Click here to set up triggers: ${RESET}""https://console.cloud.google.com/cloud-build/triggers;region=global/add?project=$PROJECT_ID"
 
 # Call function to check progress before proceeding
 check_progress
@@ -157,13 +157,13 @@ cd workingdir
 ssh-keygen -t rsa -b 4096 -N '' -f id_github -C "${USER_EMAIL}"
 
 # Step 14: Store SSH key in Secret Manager
-echo "${BOLD}${BLUE}Storing SSH key in Secret Manager${RESET}"
+echo "${BOLD}${GREEN}Storing SSH key in Secret Manager${RESET}"
 gcloud secrets create ssh_key_secret --replication-policy="automatic"
 
 gcloud secrets versions add ssh_key_secret --data-file=id_github
 
 # Step 15: Add SSH key to GitHub
-echo "${BOLD}${WHITE}Adding SSH key to GitHub${RESET}"
+echo "${BOLD}${BLUE}Adding SSH key to GitHub${RESET}"
 GITHUB_TOKEN=$(gh auth token)
 
 SSH_KEY_CONTENT=$(cat ~/workingdir/id_github.pub)
@@ -177,7 +177,7 @@ gh api --method POST -H "Accept: application/vnd.github.v3+json" \
 rm id_github*
 
 # Step 16: Grant permissions
-echo "${BOLD}${BLUE}Granting IAM permissions${RESET}"
+echo "${BOLD}${YELLOW}Granting IAM permissions${RESET}"
 gcloud projects add-iam-policy-binding ${PROJECT_NUMBER} \
 --member=serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
 --role=roles/secretmanager.secretAccessor
@@ -217,9 +217,9 @@ git checkout -b production
 
 rm cloudbuild.yaml
 
-curl -LO raw.githubusercontent.com/Titash-shil/Google-Kubernetes-Engine-Pipeline-using-Cloud-Build-GSP1077/refs/heads/main/Qwiklab_Explorers_Env-cloudbuild.yaml
+curl -LO raw.githubusercontent.com/QUICK-GCP-LAB/2-Minutes-Labs-Solutions/refs/heads/main/Google%20Kubernetes%20Engine%20Pipeline%20using%20Cloud%20Build/ENV-cloudbuild.yaml
 
-mv Qwiklab_Explorers_Env-cloudbuild.yaml cloudbuild.yaml
+mv ENV-cloudbuild.yaml cloudbuild.yaml
 
 sed -i "s/REGION-/$REGION/g" cloudbuild.yaml
 sed -i "s/GITHUB-USERNAME/${GITHUB_USERNAME}/g" cloudbuild.yaml
@@ -235,7 +235,7 @@ git push google production
 git push google candidate
 
 # Step 20: Trigger CD pipeline
-echo "${BOLD}${WHITE}Triggering the CD pipeline${RESET}"
+echo "${BOLD}${YELLOW}Triggering the CD pipeline${RESET}"
 cd ~/hello-cloudbuild-app
 ssh-keyscan -t rsa github.com > known_hosts.github
 chmod +x known_hosts.github
@@ -246,9 +246,9 @@ git push google master
 
 rm cloudbuild.yaml
 
-curl -LO raw.githubusercontent.com/Titash-shil/Google-Kubernetes-Engine-Pipeline-using-Cloud-Build-GSP1077/refs/heads/main/Qwiklab_Explorers_App-cloudbuild.yaml
+curl -LO raw.githubusercontent.com/QUICK-GCP-LAB/2-Minutes-Labs-Solutions/refs/heads/main/Google%20Kubernetes%20Engine%20Pipeline%20using%20Cloud%20Build/APP-cloudbuild.yaml
 
-mv Qwiklab_Explorers_App-cloudbuild.yaml cloudbuild.yaml
+mv APP-cloudbuild.yaml cloudbuild.yaml
 
 sed -i "s/REGION/$REGION/g" cloudbuild.yaml
 sed -i "s/GITHUB-USERNAME/${GITHUB_USERNAME}/g" cloudbuild.yaml
@@ -265,10 +265,65 @@ echo
 function random_congrats() {
     MESSAGES=(
         "${GREEN}Congratulations For Completing The Lab! Keep up the great work!${RESET}"
-        "${BLUE}Well done! Your hard work and effort have paid off!${RESET}"
-        "${WHITE}Bravo! You’ve completed the lab with excellence!${RESET}"
-        "${CYAN}Amazing work! You’re making impressive progress!${RESET}"
-        "${RED}You’ve made remarkable progress! Congratulations again!!${RESET}"
+        "${CYAN}Well done! Your hard work and effort have paid off!${RESET}"
+        "${YELLOW}Amazing job! You’ve successfully completed the lab!${RESET}"
+        "${BLUE}Outstanding! Your dedication has brought you success!${RESET}"
+        "${MAGENTA}Great work! You’re one step closer to mastering this!${RESET}"
+        "${RED}Fantastic effort! You’ve earned this achievement!${RESET}"
+        "${CYAN}Congratulations! Your persistence has paid off brilliantly!${RESET}"
+        "${GREEN}Bravo! You’ve completed the lab with flying colors!${RESET}"
+        "${YELLOW}Excellent job! Your commitment is inspiring!${RESET}"
+        "${BLUE}You did it! Keep striving for more successes like this!${RESET}"
+        "${MAGENTA}Kudos! Your hard work has turned into a great accomplishment!${RESET}"
+        "${RED}You’ve smashed it! Completing this lab shows your dedication!${RESET}"
+        "${CYAN}Impressive work! You’re making great strides!${RESET}"
+        "${GREEN}Well done! This is a big step towards mastering the topic!${RESET}"
+        "${YELLOW}You nailed it! Every step you took led you to success!${RESET}"
+        "${BLUE}Exceptional work! Keep this momentum going!${RESET}"
+        "${MAGENTA}Fantastic! You’ve achieved something great today!${RESET}"
+        "${RED}Incredible job! Your determination is truly inspiring!${RESET}"
+        "${CYAN}Well deserved! Your effort has truly paid off!${RESET}"
+        "${GREEN}You’ve got this! Every step was a success!${RESET}"
+        "${YELLOW}Nice work! Your focus and effort are shining through!${RESET}"
+        "${BLUE}Superb performance! You’re truly making progress!${RESET}"
+        "${MAGENTA}Top-notch! Your skill and dedication are paying off!${RESET}"
+        "${RED}Mission accomplished! This success is a reflection of your hard work!${RESET}"
+        "${CYAN}You crushed it! Keep pushing towards your goals!${RESET}"
+        "${GREEN}You did a great job! Stay motivated and keep learning!${RESET}"
+        "${YELLOW}Well executed! You’ve made excellent progress today!${RESET}"
+        "${BLUE}Remarkable! You’re on your way to becoming an expert!${RESET}"
+        "${MAGENTA}Keep it up! Your persistence is showing impressive results!${RESET}"
+        "${RED}This is just the beginning! Your hard work will take you far!${RESET}"
+        "${CYAN}Terrific work! Your efforts are paying off in a big way!${RESET}"
+        "${GREEN}You’ve made it! This achievement is a testament to your effort!${RESET}"
+        "${YELLOW}Excellent execution! You’re well on your way to mastering the subject!${RESET}"
+        "${BLUE}Wonderful job! Your hard work has definitely paid off!${RESET}"
+        "${MAGENTA}You’re amazing! Keep up the awesome work!${RESET}"
+        "${RED}What an achievement! Your perseverance is truly admirable!${RESET}"
+        "${CYAN}Incredible effort! This is a huge milestone for you!${RESET}"
+        "${GREEN}Awesome! You’ve done something incredible today!${RESET}"
+        "${YELLOW}Great job! Keep up the excellent work and aim higher!${RESET}"
+        "${BLUE}You’ve succeeded! Your dedication is your superpower!${RESET}"
+        "${MAGENTA}Congratulations! Your hard work has brought great results!${RESET}"
+        "${RED}Fantastic work! You’ve taken a huge leap forward today!${RESET}"
+        "${CYAN}You’re on fire! Keep up the great work!${RESET}"
+        "${GREEN}Well deserved! Your efforts have led to success!${RESET}"
+        "${YELLOW}Incredible! You’ve achieved something special!${RESET}"
+        "${BLUE}Outstanding performance! You’re truly excelling!${RESET}"
+        "${MAGENTA}Terrific achievement! Keep building on this success!${RESET}"
+        "${RED}Bravo! You’ve completed the lab with excellence!${RESET}"
+        "${CYAN}Superb job! You’ve shown remarkable focus and effort!${RESET}"
+        "${GREEN}Amazing work! You’re making impressive progress!${RESET}"
+        "${YELLOW}You nailed it again! Your consistency is paying off!${RESET}"
+        "${BLUE}Incredible dedication! Keep pushing forward!${RESET}"
+        "${MAGENTA}Excellent work! Your success today is well earned!${RESET}"
+        "${RED}You’ve made it! This is a well-deserved victory!${RESET}"
+        "${CYAN}Wonderful job! Your passion and hard work are shining through!${RESET}"
+        "${GREEN}You’ve done it! Keep up the hard work and success will follow!${RESET}"
+        "${YELLOW}Great execution! You’re truly mastering this!${RESET}"
+        "${BLUE}Impressive! This is just the beginning of your journey!${RESET}"
+        "${MAGENTA}You’ve achieved something great today! Keep it up!${RESET}"
+        "${RED}You’ve made remarkable progress! This is just the start!${RESET}"
     )
 
     RANDOM_INDEX=$((RANDOM % ${#MESSAGES[@]}))
