@@ -22,9 +22,9 @@
 ```
 curl -LO raw.githubusercontent.com/Titash-shil/Google-Kubernetes-Engine-Pipeline-using-Cloud-Build-GSP1077/refs/heads/main/qwiklab_explorers_gsp1077.sh
 
-sudo chmod +x qwiklab_explorers_gsp1077.sh
+sudo chmod +x *.sh
 
-./qwiklab_explorers_gsp1077.sh
+./*.sh
 ```
 ---
 
