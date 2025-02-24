@@ -217,9 +217,9 @@ git checkout -b production
 
 rm cloudbuild.yaml
 
-curl -LO raw.githubusercontent.com/QUICK-GCP-LAB/2-Minutes-Labs-Solutions/refs/heads/main/Google%20Kubernetes%20Engine%20Pipeline%20using%20Cloud%20Build/ENV-cloudbuild.yaml
+curl -LO raw.githubusercontent.com/Titash-shil/Google-Kubernetes-Engine-Pipeline-using-Cloud-Build-GSP1077/refs/heads/main/Qwiklab_Explorers_Env-cloudbuild.yaml
 
-mv ENV-cloudbuild.yaml cloudbuild.yaml
+mv Qwiklab_Explorers_Env-cloudbuild.yaml cloudbuild.yaml
 
 sed -i "s/REGION-/$REGION/g" cloudbuild.yaml
 sed -i "s/GITHUB-USERNAME/${GITHUB_USERNAME}/g" cloudbuild.yaml
